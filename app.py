@@ -1,0 +1,45 @@
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+
+# ------------------------------------------------------------------ #
+# Routes                                                              #
+# ------------------------------------------------------------------ #
+
+@app.route("/")
+def landing():
+    return render_template("landing.html")
+
+@app.route("/register")
+def register():
+    return render_template("register.html")
+
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+# Placeholder routes
+
+@app.route("/logout")
+def logout():
+    return "Logout"
+
+@app.route("/profile")
+def profile():
+    return "Profile page"
+
+@app.route("/expenses/add")
+def add_expense():
+    return "Add expense"
+
+@app.route("/expenses/<int:id>/edit")
+def edit_expense(id):
+    return "Edit expense"
+
+@app.route("/expenses/<int:id>/delete")
+def delete_expense(id):
+    return "Delete expense"
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5001)

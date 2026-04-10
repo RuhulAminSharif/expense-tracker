@@ -88,7 +88,7 @@ def logout():
 def profile():
     return "Profile page"
 
-@app.route("/expenses/add")
+@app.route("/expenses/<int:userId>/add")
 def add_expense():
     return "Add expense"
 

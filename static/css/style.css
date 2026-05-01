@@ -117,6 +117,10 @@ a {
 .nav-links a:hover {
   color: var(--ink);
 }
+.nav-link-active {
+  color: var(--accent) !important;
+  font-weight: 500;
+}
 
 .nav-cta {
   background: var(--ink) !important;

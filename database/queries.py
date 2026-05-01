@@ -1,7 +1,10 @@
 from datetime import datetime
-
 from database.db import get_db
 
+def _build_date_filter(date_from, date_to):
+  if date_from and date_to:
+    return "AND date BETWEEN ? AND ?", [date_from, date_to]
+  return "", []
 
 def get_user_by_id(user_id):
   conn = get_db()
@@ -26,17 +29,19 @@ def get_user_by_id(user_id):
   }
 
 
-def get_recent_transactions(user_id, limit=10):
+def get_recent_transactions(user_id, limit=10, date_from=None, date_to=None):
+  date_clause, date_params = _build_date_filter(date_from, date_to)
+  params = [user_id] + date_params + [limit]
+  
   conn = get_db()
   rows = conn.execute(
-    """
-    SELECT date, description, category, amount
-    FROM expenses
-    WHERE user_id = ?
-    ORDER BY date DESC, id DESC
-    LIMIT ?
-    """,
-    (user_id, limit),
+    "SELECT date, description, category, amount "
+    "FROM expenses "
+    "WHERE user_id = ? "
+    + date_clause +
+    " ORDER BY date DESC, id DESC "
+    "LIMIT ?",
+    params,
   ).fetchall()
   conn.close()
 
@@ -51,12 +56,16 @@ def get_recent_transactions(user_id, limit=10):
   ]
 
 
-def get_summary_stats(user_id):
+def get_summary_stats(user_id, date_from=None, date_to=None):
+  date_clause, date_params = _build_date_filter(date_from, date_to)
+  params = [user_id] + date_params
+
   conn = get_db()
   row = conn.execute(
     "SELECT COALESCE(SUM(amount), 0) AS total, COUNT(*) AS count "
-    "FROM expenses WHERE user_id = ?",
-    (user_id,),
+    "FROM expenses WHERE user_id = ? "
+    + date_clause,
+    params,
   ).fetchone()
   total_value = row["total"]
   count = row["count"]
@@ -77,17 +86,19 @@ def get_summary_stats(user_id):
   }
 
 
-def get_category_breakdown(user_id):
+def get_category_breakdown(user_id, date_from=None, date_to=None):
+  date_clause, date_params = _build_date_filter(date_from, date_to)
+  params = [user_id] + date_params
+
   conn = get_db()
   rows = conn.execute(
-    """
-    SELECT category AS name, SUM(amount) AS total
-    FROM expenses
-    WHERE user_id = ?
-    GROUP BY category
-    ORDER BY total DESC
-    """,
-    (user_id,),
+    "SELECT category AS name, SUM(amount) AS total "
+    "FROM expenses "
+    "WHERE user_id = ? "
+    + date_clause +
+    " GROUP BY category "
+    "ORDER BY total DESC",
+    params,
   ).fetchall()
   conn.close()
 
